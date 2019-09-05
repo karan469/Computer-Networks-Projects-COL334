@@ -46,13 +46,14 @@ public class TCPClient {
 		
 		// Send for the registration
 		// Server will check for the user correctness
-		CSSSendToServer.writeBytes("REGISTER TOSEND " + username + "\n\n");
+		CSSSendToServer.writeBytes("REGISTER TOSEND " + username + "\n" + "\n");
 		String ack = CSSAckFromServer.readLine();
 		while (!ack.equals("REGISTERED TOSEND " + username)) {
 			System.out.println(ack);
 			System.out.println("username is not alphanumeric without spaces");
 			username = inFromUser.readLine();
-			CSSSendToServer.writeBytes("REGISTER TOSEND" + username);
+			CSSSendToServer.writeBytes("REGISTER TOSEND " + username + "\n" + "\n");
+			System.out.println("send agained");
 			ack = CSSAckFromServer.readLine();
 		}
 		System.out.println(ack);
