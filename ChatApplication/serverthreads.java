@@ -96,17 +96,20 @@ class SocketThread implements Runnable {
         boolean h1 = false;
         boolean h2 = false;
         // boolean h3 = false;
-        if(clientSentence.indexOf("SEND TO ")!=-1){
+        if(clientSentence.indexOf("SEND ")!=-1){
           h1 = true;
-          recipient = clientSentence.split("SEND TO ")[1];
+          recipient = clientSentence.split("SEND ")[1];
         } else {out.println("ERR103");}
         clientSentence = in.nextLine();
-        if(clientSentence.indexOf("Length: ")!=-1 && h1){
+        if(clientSentence.indexOf("Content-length: ")!=-1 && h1){
           h2 = true;
-          len = Integer.parseInt(clientSentence.split("Length: ")[1]);
+          len = Integer.parseInt(clientSentence.split("Content-length: ")[1]);
         } else {out.println("ERR103");}
 
+
+        // clientSentence = in.nextLine();
         clientSentence = in.nextLine();
+
         if(h2){
           packet = clientSentence;
         }
@@ -157,5 +160,3 @@ class SocketThread implements Runnable {
     }
   }
 }
-
-
