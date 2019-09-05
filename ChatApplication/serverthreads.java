@@ -123,8 +123,9 @@ class SocketThreadToSend implements Runnable {
 		try {
 			// REGISTRATION
 			String username = "";
+			String clientSentence ="";
 			while (this.registeredToSend == false) {
-				String clientSentence = in.nextLine();
+				clientSentence = in.nextLine();
 				if (clientSentence.indexOf("REGISTER TOSEND") != -1
 						&& Pattern.matches("^[a-zA-Z0-9]+$", clientSentence.split("REGISTER TOSEND ")[1])) {
 					username = clientSentence.split("REGISTER TOSEND ")[1];
@@ -136,12 +137,12 @@ class SocketThreadToSend implements Runnable {
 					break;
 				} else {
 					out.println("ERROR 100 Malformed username");
+					in.nextLine();
 				}
 			}
 			System.out.println("Registered user " + username);
 			// System.out.println(TCPServer.tableIn);
 			// System.out.println(TCPServer.tableOut);
-
 			// MESSAGE SENDING
 			boolean exitApp = false;
 			while (!exitApp) {
@@ -149,15 +150,19 @@ class SocketThreadToSend implements Runnable {
 				String packet = "";
 				String recipient = "";
 				int len = 0;
-				String clientSentence = in.nextLine();
+				clientSentence = in.nextLine();
 				boolean h1 = false;
 				boolean h2 = false;
 				boolean h3 = false;
+				System.out.println(clientSentence);
+				if (clientSentence.equals("")) {
+					continue;
+				}
 				if (clientSentence.indexOf("SEND ") != -1) {
 					h1 = true;
 					recipient = clientSentence.split("SEND ")[1];
 				} else {
-					out.println("ERR103");
+					out.println("ERR1031");
 				}
 
 				if (TCPServer.tableOut.containsKey(recipient)) {
@@ -169,26 +174,29 @@ class SocketThreadToSend implements Runnable {
 					h2 = true;
 					len = Integer.parseInt(clientSentence.split("Content-length: ")[1]);
 				} else {
-					out.println("ERR103");
+					out.println("ERR1032");
 				}
-
+				System.out.println(clientSentence);
 				clientSentence = in.nextLine();
+				System.out.println(clientSentence);
 				clientSentence = in.nextLine();
-
+				System.out.println(clientSentence);
 				if (h2 && h3) {
 					packet = clientSentence;
 				}
-				System.out.println(packet); // DEBUG
+				System.out.println("debug " + packet); // DEBUG
 
 				Scanner inForSecondParty = TCPServer.tableIn.get(recipient);
 				PrintWriter outForSecondParty = TCPServer.tableOut.get(recipient);
-				outForSecondParty.println("FORWARD " + username + "\n");
-				outForSecondParty.println("Content-length: " + len + "\n");
+				outForSecondParty.println("FORWARD " + username);
+				outForSecondParty.println("Content-length: " + len);
 				outForSecondParty.println("\n");
 				outForSecondParty.println(packet);
 
 				String responseFromSecondParty = inForSecondParty.nextLine();
-				if (responseFromSecondParty.indexOf("RECIEVED ") != -1) { // ACK is positive
+				responseFromSecondParty = inForSecondParty.nextLine();
+				System.out.println(responseFromSecondParty);
+				if (responseFromSecondParty.indexOf("RECEIVED ") != -1) { // ACK is positive
 					out.println("SENT " + recipient + "\n");
 					out.println("\n");
 				} else if (responseFromSecondParty.indexOf("ERROR 103 Header Incomplete") != -1) { // ACK is negative
