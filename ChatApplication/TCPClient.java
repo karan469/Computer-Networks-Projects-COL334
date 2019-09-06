@@ -3,42 +3,13 @@ import java.net.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-//
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-
 
 public class TCPClient {
 
-	public static KeyPair generateKeyPair;
-	public static byte[] publicKey;
-	public static byte[] privateKey;
-
 	public static void main(String argv[]) throws Exception {
-		
-		/////////INITIALIZING ENCRYPTION PAIR//////////////
-		try {
-			generateKeyPair = EncryptionRSA.generateKeyPair();
-		} catch(NoSuchAlgorithmException e){
-			System.out.println("Error: ");
-			System.out.println(e);
-		} finally{
-			generateKeyPair = EncryptionRSA.generateKeyPair();
-		}
-		publicKey = generateKeyPair.getPublic().getEncoded();
-		privateKey = generateKeyPair.getPrivate().getEncoded();
-		////////////END OF INITIALIZING ENCRYPTED PAIR//////
-
 		int portNumber1 = 6789;
 		int portNumber2 = 6789;
+
 		// To read strings from the terminal
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 		// get username
@@ -84,27 +55,12 @@ public class TCPClient {
 			CSSSendToServer.writeBytes("REGISTER TOSEND " + username + "\n" + "\n");
 			System.out.println("send agained");
 			ack = CSSAckFromServer.readLine();
+			ack = CSSAckFromServer.readLine();
+			ack = CSSAckFromServer.readLine();
 		}
 		System.out.println(ack);
 		//Register for recieving port
 		CRSAckToServer.writeBytes("REGISTER TORECV "+ username + "\n\n");
-		
-
-		// //
-		// System.out.println("Public-key: " + TCPClient.publicKey + "\n");
-		// CSSSendToServer.writeBytes("Public-key: " + TCPClient.publicKey + "\n" + "\n");
-		// // CSSAckFromServer.readLine();
-		// ack = CSSAckFromServer.readLine();
-		
-		// while(ack.indexOf("PUBLIC-KEY STORED")==-1){
-		// 	System.out.println("not confirmed");
-		// 	CSSSendToServer.writeBytes("Public-key: " + TCPClient.publicKey + "\n" + "\n");
-		// 	// ack = CSSAckFromServer.readLine();
-		// }
-		// System.out.println(ack);
-		//
-
-		//This was uncommented before this public key bakchodi
 		String ack1 = CRSRecievefromServer.readLine();
 		System.out.println(ack1);
 
@@ -185,6 +141,8 @@ class SendingThread implements Runnable {
 					Ack = CSSAckFromServer.readLine();
 
 					System.out.println("FROM SERVER: " + Ack);
+					Ack = CSSAckFromServer.readLine();
+					Ack = CSSAckFromServer.readLine();
 				} catch (Exception e) {
 					// TODO: handle exception
 					System.out.println(e);
