@@ -3,10 +3,37 @@ import java.net.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+//
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class TCPClient {
-
+	public static KeyPair generateKeyPair;
+	public static byte[] publicKey;
+	public static byte[] privateKey;
 	public static void main(String argv[]) throws Exception {
+		/////////INITIALIZING ENCRYPTION PAIR//////////////
+		try {
+			generateKeyPair = EncryptionRSA.generateKeyPair();
+		} catch(NoSuchAlgorithmException e){
+			System.out.println("Error: ");
+			System.out.println(e);
+		} finally{
+			generateKeyPair = EncryptionRSA.generateKeyPair();
+		}
+		publicKey = generateKeyPair.getPublic().getEncoded();
+		privateKey = generateKeyPair.getPrivate().getEncoded();
+		////////////END OF INITIALIZING ENCRYPTED PAIR//////
+
 		int portNumber1 = 6789;
 		int portNumber2 = 6789;
 
@@ -59,10 +86,17 @@ public class TCPClient {
 			ack = CSSAckFromServer.readLine();
 		}
 		System.out.println(ack);
+		
 		//Register for recieving port
 		CRSAckToServer.writeBytes("REGISTER TORECV "+ username + "\n\n");
 		String ack1 = CRSRecievefromServer.readLine();
 		System.out.println(ack1);
+
+		//SEND PUBLIC KEY TO SERVER//
+		CRSAckToServer.writeBytes("PUBLICKEY: " + Base64.getEncoder().encodeToString(TCPClient.publicKey) + "\n" + "\n");
+
+		String ack2 = CRSRecievefromServer.readLine();
+		System.out.println(ack2);
 
 		// start the client operation
 		// Generate two threads for sending and recieving messages
@@ -122,15 +156,48 @@ class SendingThread implements Runnable {
 		System.out.println(str);
 		return str;
 	}
+	String whomToSend() throws IOException {
+		String str, sentence;
+		Pattern message = Pattern.compile("@[A-Za-z0-9]+[ ]+.+");
+		sentence = inFromUser.readLine();
+		while (!message.matcher(sentence).matches()) {
+			if (sentence.equals("exit\n")) {
+				return null;
+			}
+			System.out.println("Required Format is: @[recipient username][message]");
+			sentence = inFromUser.readLine();
+		}
+		Matcher m1, m2;
+		m1 = Pattern.compile("[a-zA-Z0-9]+").matcher(sentence);
+		m2 = Pattern.compile("@[a-zA-Z0-9]+[ ]+").matcher(sentence);
+		m2.find();
+		m1.find();
+		// str = "SEND " + m1.group(0) + "\n" + "Content-length: " + sentence.substring(m2.group(0).length()).length()
+		// 		+ "\n" + "\n" + sentence.substring(m2.group(0).length()) + "\n";
+		// System.out.println(str);
+		System.out.println(m1.group(0));
+		return m1.group(0);
+	}
 
 	///////////////////////////////////
 	@Override
 	public void run() {
 		String sendTaar = "";
+		String kiskoDena = "";
 		String Ack;
 		try {
 			while (true) {
 				try {
+					//ASK PUBLIC KEY OF RECIPIENT
+					// kiskoDena = whomToSend();
+					// if(kiskoDena == null){
+					// 	break;
+					// }
+					// CSSSendToServer.writeBytes("GIVE PUBLICKEY OF " + kiskoDena + "\n");
+					// Ack = CSSAckFromServer.readLine();
+					// System.out.println("FROM SERVER: " + Ack);
+					// Ack = CSSAckFromServer.readLine();
+					// Ack = CSSAckFromServer.readLine();
 
 					sendTaar = sendMessage();
 					if (sendTaar == null) {
