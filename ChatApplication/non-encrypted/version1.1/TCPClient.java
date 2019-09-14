@@ -61,12 +61,13 @@ public class TCPClient {
 		System.out.println(ack);
 		CSSAckFromServer.readLine();
 		CSSAckFromServer.readLine();
+
 		//Register for recieving port
 		CRSAckToServer.writeBytes("REGISTER TORECV "+ username + "\n\n");
 		String ack1 = CRSRecievefromServer.readLine();
 		System.out.println(ack1);
 		CRSRecievefromServer.readLine();
-        CRSRecievefromServer.readLine();		
+		CRSRecievefromServer.readLine();		
 
 
 		// start the client operation

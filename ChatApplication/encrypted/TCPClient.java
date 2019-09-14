@@ -3,7 +3,6 @@ import java.net.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-// import java.nio.charset.*;
 //
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -16,49 +15,12 @@ import java.security.SecureRandom;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.security.*;
-
-import java.security.MessageDigest;
-import java.security.Signature;
 
 public class TCPClient {
 	public static KeyPair generateKeyPair;
 	public static byte[] publicKey;
 	public static byte[] privateKey;
 
-	public static String sign(String plainText, PrivateKey privateKey) throws Exception {
-		Signature privateSignature = Signature.getInstance("SHA1withRSA");
-		privateSignature.initSign(privateKey);
-		privateSignature.update(Base64.getDecoder().decode(plainText));
-	
-		byte[] signature = privateSignature.sign();
-	
-		return Base64.getEncoder().encodeToString(signature);
-	}
-	
-	public static boolean verify(String plainText, String signature, PublicKey publicKey) throws Exception {
-		Signature publicSignature = Signature.getInstance("SHA1withRSA");
-		publicSignature.initVerify(publicKey);
-		publicSignature.update(Base64.getDecoder().decode(plainText));
-	
-		byte[] signatureBytes = Base64.getDecoder().decode(signature);
-	
-		return publicSignature.verify(signatureBytes);
-	}
-
-	public static String SignatureString(byte[] encryptedData, PrivateKey privateKey) throws Exception{
-		String result = ""; 
-		MessageDigest md = MessageDigest.getInstance("SHA-256");
-		byte[] shaBytes = md.digest(encryptedData);
-		
-		Signature sig = Signature.getInstance("SHA1withRSA");
-		sig.initSign(privateKey);
-		sig.update(shaBytes);
-		byte[] signatureBytes = sig.sign();
-		result = Base64.getEncoder().encodeToString(signatureBytes);
-		return result;
-	}
-	
 	public static void main(String argv[]) throws Exception {
 		///////// INITIALIZING ENCRYPTION PAIR//////////////
 		try {
@@ -126,12 +88,12 @@ public class TCPClient {
 		CSSAckFromServer.readLine();
 		CSSAckFromServer.readLine();
 
-		//Register for recieving port
-		CRSAckToServer.writeBytes("REGISTER TORECV "+ username + "\n\n");
+		// Register for recieving port
+		CRSAckToServer.writeBytes("REGISTER TORECV " + username + "\n\n");
 		String ack1 = CRSRecievefromServer.readLine();
 		System.out.println(ack1);
 		CRSRecievefromServer.readLine();
-		CRSRecievefromServer.readLine();
+        CRSRecievefromServer.readLine();
 
 		// SEND PUBLIC KEY TO SERVER//
 		CRSAckToServer
@@ -187,12 +149,14 @@ class SendingThread implements Runnable {
 			System.out.println("Required Format is: @[recipient username][message]");
 			sentence = inFromUser.readLine();
 		}
+		///////////////////////////
 		str = inFromUser.readLine();
 		while(str.length()!=0)
 		{
 			sentence = sentence + '\n' + str;
 			str = inFromUser.readLine();
 		}
+		//////////////////////////
 		Matcher m1, m2;
 		m1 = Pattern.compile("[a-zA-Z0-9]+").matcher(sentence);
 		m2 = Pattern.compile("@[a-zA-Z0-9]+[ ]+").matcher(sentence);
@@ -200,7 +164,6 @@ class SendingThread implements Runnable {
 		m1.find();
 		///////////////////////////////////
 		String mail="";
-		String signatureBytesInString = "";
 		try {
 			CSSSendToServer.writeBytes("GET PUBLICKEY "+ m1.group(0)+"\n");
 			String pubkey = CSSAckFromServer.readLine();
@@ -215,17 +178,7 @@ class SendingThread implements Runnable {
 
 			byte[] encryptedData = EncryptionRSA.encrypt(Base64.getDecoder().decode(pubkey),
 			sentence.substring(m2.group(0).length()).getBytes());
-			
-			// MessageDigest md = MessageDigest.getInstance("SHA-256");
-			// byte[] shaBytes = md.digest(encryptedData);
-			
-			// Signature sig = Signature.getInstance("SHA1withRSA");
-			// sig.initSign(TCPClient.generateKeyPair.getPrivate());
-			// sig.update(shaBytes);
-			// byte[] signatureBytes = sig.sign();
-			// signatureBytesInString = Base64.getEncoder().encodeToString(signatureBytes);
-			signatureBytesInString = TCPClient.SignatureString(encryptedData, TCPClient.generateKeyPair.getPrivate());
-			
+
 			mail = Base64.getEncoder().encodeToString(encryptedData);
 		} catch (Exception e) {
 			//TODO: handle exception]
@@ -233,7 +186,7 @@ class SendingThread implements Runnable {
 		}
 		///////////////////////////////////		
 		// System.out.println("mail lenght: "+mail.length());
-		str = "SEND " + m1.group(0) + "\n" + "Signature: " + signatureBytesInString + "\n" + "Content-length: " + sentence.substring(m2.group(0).length()).length()
+		str = "SEND " + m1.group(0) + "\n" + "Content-length: " + sentence.substring(m2.group(0).length()).length()
 				+ "\n" + "\n" + mail + "\n";
 		// System.out.println(str);
 		return str;
@@ -315,23 +268,6 @@ class ReceivingThread implements Runnable {
 			return l1;
 		}
 		m1 = Pattern.compile("[a-zA-Z0-9]+").matcher(username);
-		
-		String temp1 = "";
-		String senderPublicKey = "";
-		temp1 = CRSRecievefromServer.readLine();
-		if(temp1.indexOf("SENDER PUBLIC KEY: ")!=-1){
-			// System.out.println(temp1); //DEBUG
-			senderPublicKey = temp1.split("SENDER PUBLIC KEY: ")[1];
-		}
-
-		//Sig recieving
-		String signatureInStringg = "";
-		String temp = "";
-		temp = CRSRecievefromServer.readLine();
-		if(temp.indexOf("Signature: ")!=-1){
-			signatureInStringg = temp.split("Signature: ")[1];
-		}
-
 		String contentLength;
 		contentLength = CRSRecievefromServer.readLine();
 		// System.out.println("2nd line " + contentLength);
@@ -356,9 +292,8 @@ class ReceivingThread implements Runnable {
 		String message;
 		CRSRecievefromServer.readLine();
 		message = CRSRecievefromServer.readLine();
-		byte[] encryptedmessage = new byte[1024];
 		try {
-			encryptedmessage = Base64.getDecoder().decode(message);
+			byte[] encryptedmessage = Base64.getDecoder().decode(message);
 			byte[] decryptedData = EncryptionRSA.decrypt(privateKey, encryptedmessage);
 			output = new String(decryptedData);
 		} catch (Exception e) {
@@ -379,27 +314,6 @@ class ReceivingThread implements Runnable {
 		// 		count = count + (length - count);
 		// 	}
 		// }
-
-		System.out.println(temp1);
-		System.out.println(temp);
-
-		//encryptedmessage | signatureInStringg | senderPublicKey
-		//To-get: bool s2.verify(s1)
-		try{
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			byte[] shaBytes = md.digest(encryptedmessage);
-			
-			byte[] pubKey = Base64.getDecoder().decode(senderPublicKey);
-			X509EncodedKeySpec keySpec = new X509EncodedKeySpec(pubKey);
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-			PublicKey publickey = keyFactory.generatePublic(keySpec);
-			// PublicKey publickey = KeyFactory.getInstance("SHA1withRSA").generatePublic(new PKCS8EncodedKeySpec(pubKey));
-			boolean isSame = TCPClient.verify(Base64.getEncoder().encodeToString(shaBytes), signatureInStringg, publickey);
-
-			System.out.println("HOLA: " + isSame);
-		} catch(Exception e){
-			System.out.println(e);
-		}
 
 		m1.find();
 		l1.add(m1.group(0));

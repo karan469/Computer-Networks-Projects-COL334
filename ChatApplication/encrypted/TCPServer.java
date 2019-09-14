@@ -20,7 +20,12 @@ class TCPServer {
 
 			Socket connectionSocket1 = welcomeSocket.accept();
 			Socket connectionSocket2 = welcomeSocket.accept();
+			// BufferedReader inFromClient =
+			// new BufferedReader(new
+			// InputStreamReader(connectionSocket.getInputStream()));
 
+			// DataOutputStream outToClient =
+			// new DataOutputStream(connectionSocket.getOutputStream());
 			System.out.println("ClientSockets: " + connectionSocket1);
 			System.out.println("ClientSockets: " + connectionSocket2);
 			Scanner in1 = new Scanner(connectionSocket1.getInputStream());
@@ -88,7 +93,7 @@ class SocketThreadToRecieve implements Runnable {
 			System.out.println(line);
 			if (line.indexOf("PUBLICKEY: ") != -1) {
 				pubkey = line.split("PUBLICKEY: ")[1];
-				out.println("[ACK] SERVER GOT THE KEY");
+				out.println("GOT THE KEY");
 			}
 
 			byte[] publickey = Base64.getDecoder().decode(pubkey);
@@ -154,7 +159,7 @@ class SocketThreadToSend implements Runnable {
 			System.out.println("Registered user " + username + " for recieveing messages.");
 			// System.out.println(TCPServer.tableIn);
 			// System.out.println(TCPServer.tableOut);
-
+			
 			in.nextLine();
 			// MESSAGE SENDING
 			boolean exitApp = false;
@@ -167,7 +172,7 @@ class SocketThreadToSend implements Runnable {
 					out.println("PUBLICKEY " + Base64.getEncoder().encodeToString(TCPServer.publickeys.get(user)));
 				} else {
 					out.println("Error 101 No User: " + user + " registered");
-					System.out.println("Wrong user requested");
+					System.out.println("FK yea");
 					continue;
 				}
 
@@ -178,8 +183,6 @@ class SocketThreadToSend implements Runnable {
 				boolean h1 = false;
 				boolean h2 = false;
 				boolean h3 = false;
-				boolean h5 = false;
-				String sigInString = "";
 
 				System.out.println(clientSentence);
 				if (clientSentence.equals("")) {
@@ -199,18 +202,7 @@ class SocketThreadToSend implements Runnable {
 				}
 
 				clientSentence = in.nextLine();
-				if (clientSentence.indexOf("Signature: ") != -1 && h1) {
-					h5 = true;
-					sigInString = clientSentence.split("Signature: ")[1];
-					System.out.println("Signature Intercepted: " + sigInString);
-				} else {
-					out.println("ERR1033 Incomplete Header\n");
-					out.println("\n");
-					continue;
-				}
-
-				clientSentence = in.nextLine();
-				if (clientSentence.indexOf("Content-length: ") != -1 && h5) {
+				if (clientSentence.indexOf("Content-length: ") != -1 && h1) {
 					h2 = true;
 					len = Integer.parseInt(clientSentence.split("Content-length: ")[1]);
 				} else {
@@ -218,24 +210,17 @@ class SocketThreadToSend implements Runnable {
 					out.println("\n");
 					continue;
 				}
-
 				clientSentence = in.nextLine();
 				clientSentence = in.nextLine();
 				if (h2) {
 					packet = clientSentence;
 				}
-				System.out.println("Message intercepted by SERVER: " + packet); // DEBUG
+				// System.out.println("debug " + packet); // DEBUG
 
 				if (TCPServer.tableOut.containsKey(recipient)) {
 					Scanner inForSecondParty = TCPServer.tableIn.get(recipient);
 					PrintWriter outForSecondParty = TCPServer.tableOut.get(recipient);
-					byte[] sendersPubKey = TCPServer.publickeys.get(username);
-					String sendersPubKeyInString = Base64.getEncoder().encodeToString(sendersPubKey);
 					outForSecondParty.println("FORWARD " + username);
-					System.out.println("FORWARD " + username);// DEBUG
-					outForSecondParty.println("SENDER PUBLIC KEY: " + sendersPubKeyInString);// sig sending
-					System.out.println("SENDER PUBLIC KEY: " + sendersPubKeyInString);// DEBUG
-					outForSecondParty.println("Signature: " + sigInString);// sig sending
 					outForSecondParty.println("Content-length: " + len);
 					outForSecondParty.println("\n");
 					outForSecondParty.println(packet);
@@ -247,7 +232,7 @@ class SocketThreadToSend implements Runnable {
 						out.println("SENT " + recipient);
 						out.println("\n");
 					} else if (responseFromSecondParty.indexOf("ERROR 103 Header Incomplete") != -1) { // ACK is
-						// negative
+																										// negative
 						out.println("ERROR102 Unable to send");
 						out.println("\n");
 					}
