@@ -18,7 +18,7 @@ class TCPServer {
 
 	public static void main(String argv[]) throws Exception {
 
-		ServerSocket welcomeSocket = new ServerSocket(6789);
+		ServerSocket welcomeSocket = new ServerSocket(3000);
 		Hashtable<String, Socket> list = new Hashtable<String, Socket>();
 
 		while (true) {
