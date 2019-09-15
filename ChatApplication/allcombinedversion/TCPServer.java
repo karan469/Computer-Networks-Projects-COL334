@@ -491,7 +491,7 @@ class SocketThreadToSendEncrypted implements Runnable {
 					h2 = true;
 					len = Integer.parseInt(clientSentence.split("Content-length: ")[1]);
 				} else {
-					out.println("ERR103 Incomplete Header\n");
+					out.println("ERROR103 Incomplete Header\n");
 					out.println("\n");
 					continue;
 				}
@@ -518,14 +518,14 @@ class SocketThreadToSendEncrypted implements Runnable {
 						out.println("\n");
 					} else if (responseFromSecondParty.indexOf("ERROR 103") != -1) { // ACK is
 																										// negative
-						out.println("ERROR102 Header incomplete");
+						out.println("ERROR102 Unable to send");
 						out.println("\n");
 					}
 
 				} else {
 					out.println("Error 101 No User: " + recipient + " registered");
 					out.println("\n");
-					System.out.println("FK yea");
+					//System.out.println("FK yea");
 				}
 			}
 		} catch (Exception e) {
@@ -729,7 +729,7 @@ class SocketThreadToSendEncryptedWithSig implements Runnable {
 					sigInString = clientSentence.split("Signature: ")[1];
 					System.out.println("Signature Intercepted: " + sigInString);
 				} else {
-					out.println("ERR1033 Incomplete Header\n");
+					out.println("ERROR 103 Incomplete Header\n");
 					out.println("\n");
 					continue;
 				}
@@ -739,7 +739,7 @@ class SocketThreadToSendEncryptedWithSig implements Runnable {
 					h2 = true;
 					len = Integer.parseInt(clientSentence.split("Content-length: ")[1]);
 				} else {
-					out.println("ERR103 Incomplete Header\n");
+					out.println("ERROR 103 Incomplete Header\n");
 					out.println("\n");
 					continue;
 				}
@@ -773,18 +773,17 @@ class SocketThreadToSendEncryptedWithSig implements Runnable {
 						out.println("\n");
 					} else if (responseFromSecondParty.indexOf("ERROR 103") != -1) { // ACK is
 						// negative
-						out.println("ERROR102 Header incomplete");
+						out.println("ERROR102 Unable to send");
 						out.println("\n");
 					} else if(responseFromSecondParty.indexOf("ERROR 104") != -1)
 					{
-						out.println("ERROR104 Signature Not Same");
+						out.println("ERROR 104 Signature Not Same");
 						out.println("\n");
 					}
 
 				} else {
 					out.println("Error 101 No User: " + recipient + " registered");
 					out.println("\n");
-					System.out.println("FK yea");
 				}
 			}
 		} catch (Exception e) {
