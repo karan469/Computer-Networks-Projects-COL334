@@ -95,8 +95,8 @@ public class TCPClient {
 			System.out.println("mode: ");
 			mode = inFromUser.readLine();
 		}
-		int portNumber1 = 6789;
-		int portNumber2 = 6789;
+		int portNumber1 = 3000;
+		int portNumber2 = 3000;
 		
 		System.out.println("IP: ");
 		String server = inFromUser.readLine();
