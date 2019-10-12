@@ -5,9 +5,9 @@ Assignment-3
 
 Packet Trace Instructions:
 
-> Place the 3 apache log files into the directory same as .cpp
-> run g++ -o first csvparser.cpp ; ./first
-> run g++ -o second histogram_generator.cpp ; ./second
+1. Place the 3 apache log files into the directory same as .cpp
+2. run g++ -o first csvparser.cpp ; ./first
+3. run g++ -o second histogram_generator.cpp ; ./second
 
 These instructions will produce multiple csv files:
 1. *_tcp_histogram.csv: This will be used to plot histogram, mentioned in Q3.
