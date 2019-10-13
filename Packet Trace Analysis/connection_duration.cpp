@@ -90,18 +90,26 @@ int maxTimeDuration(map<pair<string, string>, pair<int, int>> res){
 	return maxd;
 }
 
-void miniController(string id, map<pair<string, string>, pair<int, int>> res){
-	ofstream myfile;
+double meanTimeDuration(map<pair<string, string>, pair<int, int>> res){
+	double sum = 0;
+	int count = 0;
 	map<pair<string, string>, pair<int, int>>::iterator itr;
-	int max_duration = maxTimeDuration(res);
-	for(int i=0;i<=max_duration;i++){
-		for(itr = res.begin();itr!=res.end();itr++){
-			int time = (itr->second).second - (itr->second).first;
-			if(time < i){
-
-			}
-		}
+	for(itr = res.begin();itr!=res.end();itr++){
+		// int time = (itr->second).second - (itr->second).first;
+		// if(time>maxd){maxd = time;}
+		sum += (itr->second).second - (itr->second).first;
+		count++;
 	}
+	return (double)(sum)/(count);
+}
+
+int isDestinationPort21(string s){
+	string s1 = s;
+	string s2 = ">  21";
+	if (s1.find(s2) != std::string::npos){
+		return 1;
+	}
+	return -1;
 }
 
 void connectionDuration(string filename){
@@ -152,12 +160,13 @@ void connectionDuration(string filename){
 			}
 		}
 		tempp = answertocdf[answertocdf.size()-1];
-		cdfFile << "\"Connection Duration\"" << "\"Probability\""<<endl;
+		cdfFile << "\"Connection Duration\"," << "\"Probability\""<<endl;
 		for(int i=0;i<answertocdf.size();i++){
 			// answertocdf[i] /= tempp;
-			cout<<i<<" -> "<<(answertocdf[i])/tempp<<endl; 
+			// cout<<i<<" -> "<<(answertocdf[i])/tempp<<endl; 
 			cdfFile << "\""<<i<<"\""<<",\""<<(answertocdf[i])/tempp<<"\""<<endl;
 		}
+		cout<<"Mean Time Duration for " + id<<": "<<meanTimeDuration(res)<<endl;
 		//-----------------------------------------------------------
 
 	} else {
@@ -166,10 +175,66 @@ void connectionDuration(string filename){
 
 }
 
+void sentAndRecData(string filename){
+	map<pair<string, string>, pair<int, int>> res;
+	// res.insert({make_pair("0","0"), make_pair(0,0)});
+	string id = filename.substr(0,filename.length()-4);
+	ifstream myfile(filename);
+	ofstream outputq5;
+
+	if(myfile.is_open() && filename.find("_unique_tcp_allpackets") != std::string::npos){
+		outputq5.open(id + "_q5.csv");
+		string l;
+		getline(myfile,l);
+
+		while(getline(myfile,l)){
+			vector<string> line = giveTokens(l);
+			string sourceIP = sourceip(l);
+			string destIP = destip(l);
+
+			// cout<<stoi(line[5].substr(1,line[5].length()-2))<<endl;
+			int bytelength = stoi(line[5].substr(1,line[5].length()-2));
+
+			pair<string, string> pr1 = make_pair(sourceIP, destIP);
+			pair<string, string> pr2 = make_pair(destIP, sourceIP);
+			map<pair<string, string>, pair<int, int>>::iterator it1 = res.find(pr1);
+			map<pair<string, string>, pair<int, int>>::iterator it2 = res.find(pr2);
+
+			bool isRequestToFTP = (line[6].find("Request") != std::string::npos);
+			bool isfromClient = (isDestinationPort21(line[6])==1) || isRequestToFTP;
+
+			if(isfromClient){
+				if(it1 == res.end() && it2 ==res.end()){
+					res.insert({pr1, make_pair(bytelength,0)});
+				} else if(it1!=res.end()){
+					it1->second.first += bytelength;
+				}
+			} else if(!isfromClient){
+				if(it2 == res.end() && it1 == res.end()){
+					res.insert({pr2, make_pair(0,bytelength)});
+				} else if(it2 != res.end()){
+					it2->second.second += bytelength;
+				} 
+			}
+		}
+		outputq5<<"\""<<"Client IP"<< "\"," <<"Server IP"<< "\"," <<"Data Sent"<< "\"," <<"\"Data Recieved\""<<endl;
+		map<pair<string, string>, pair<int, int>>::iterator itr;
+		for(itr = res.begin();itr!=res.end();itr++){
+			outputq5<<(itr->first).first << "," << (itr->first).second << ",\"" << (itr->second).first << "\",\"" << (itr->second).second<<"\""<<endl;
+		}
+		// printSpecialMaps(res);
+		outputq5.close();
+	} else {
+		cout<<"Cannot open "<<filename<<endl;
+	}
+}
+
 int main(int argc, char const *argv[])
 {
 	string path_header = "./outputs/q4/";
+	string path_header_q5 = "./outputs/q5/";
 	vector<string> s = {{"lbnl.anon-ftp.03-01-11"},{"lbnl.anon-ftp.03-01-14"},{"lbnl.anon-ftp.03-01-18"}}; 
 	for(int i=0;i<s.size();i++){connectionDuration(path_header + s[i] + "_letsee_all.csv");}
+	for(int i=0;i<s.size();i++){sentAndRecData(path_header_q5 + s[i] + "_unique_tcp_allpackets.csv");}
 	return 0;
 }
