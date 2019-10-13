@@ -111,7 +111,7 @@ void solveCSV(string sg){
 			
 			// //checking unique server IPs
 			if(line.size()>4 && line[4]=="\"TCP\""){
-				if(synOrAck(line[6])==-1 && synOrAck(prevLine[6])!=0) {
+				if(synOrAck(line[6])==-1) {
 					uniqueServerFile<<l<<endl;
 				}
 				if(synOrAck(line[6])==1 && isDestinationPort21(line[6])==1){
@@ -128,10 +128,14 @@ void solveCSV(string sg){
 		uniqueTCPAllFile.close();
 		
 		// Now create actual unique server/client IP csv and remove this *_syn.csv files
-		// system(("awk -F, '!seen[$4]++' " + id + "_syn.csv" + " > " +  id + "_unique_server.csv").c_str());
-		// system(("awk -F, '!seen[$3]++' " + id + "_syn.csv" + " > " +  id + "_unique_client.csv").c_str());
-		// system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_flow_ackonly.csv" + " > " +  id + "_unique_flow_ackonly.csv").c_str());
-		system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_all.csv" + " > " +  "./outputs/q4/" + id + "_letsee_all.csv").c_str()); //this assumes a directory ./outputs/q4/
+		system(("awk -F, '!seen[$4]++' " + id + "_syn.csv" + " > " +  id + "_unique_server.csv").c_str());
+		system(("awk -F, '!seen[$3]++' " + id + "_syn.csv" + " > " +  id + "_unique_client.csv").c_str());
+		system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_flow_ackonly.csv" + " > " +  id + "_unique_flow_ackonly.csv").c_str());
+		system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ id + "_tcp_all.csv" + " > " +  id + "_tcp_all1.csv").c_str());
+		system(("awk -F, -v s=\"Seq\" '!seen[$3, $4, (substr($7, 0, index($7,s)-1))]++' " + id + "_tcp_all1.csv" + " > " +  "./outputs/q4/" + id + "_letsee_all1.csv").c_str()); //this assumes a directory ./outputs/q4/
+		string filepath = "./outputs/q4/";
+		system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ filepath  + id + "_letsee_all1.csv" + " > " +  "./outputs/q4/" +  id + "_letsee_all.csv").c_str());
+		// system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_all.csv" + " > " +  "./outputs/q4/" + id + "_letsee_all.csv").c_str()); //this assumes a directory ./outputs/q4/
 		
 		// if you want to store _letsee_all.csv in home directory too.
 		// system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_all.csv" + " > " + id + "_letsee_all.csv").c_str());
@@ -142,6 +146,8 @@ void solveCSV(string sg){
 		//Destroying useless files //might be used in future code devolopment - who tf knows.
 		system(("rm " +  id + "_syn.csv").c_str());
 		system(("rm " +  id + "_tcp_flow_ackonly.csv").c_str());
+		system(("rm " +  id + "_tcp_all1.csv").c_str());
+		system(("rm " + filepath +  id + "_letsee_all1.csv").c_str());
 		// cout<<"No. of SYN packets: "<<uniqueServerIPs<<endl;
 		cout<<"File opened successfully: " + sg<<endl<<endl;
 	} else {
