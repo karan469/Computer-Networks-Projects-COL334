@@ -80,13 +80,40 @@ void printSpecialMaps(map<pair<string, string>, pair<int, int>> res){
 	// cout<<"Total Connections: "<<count<<endl;
 }
 
+int maxTimeDuration(map<pair<string, string>, pair<int, int>> res){
+	int maxd = INT_MIN;
+	map<pair<string, string>, pair<int, int>>::iterator itr;
+	for(itr = res.begin();itr!=res.end();itr++){
+		int time = (itr->second).second - (itr->second).first;
+		if(time>maxd){maxd = time;}
+	}
+	return maxd;
+}
+
+void miniController(string id, map<pair<string, string>, pair<int, int>> res){
+	ofstream myfile;
+	map<pair<string, string>, pair<int, int>>::iterator itr;
+	int max_duration = maxTimeDuration(res);
+	for(int i=0;i<=max_duration;i++){
+		for(itr = res.begin();itr!=res.end();itr++){
+			int time = (itr->second).second - (itr->second).first;
+			if(time < i){
+
+			}
+		}
+	}
+}
+
 void connectionDuration(string filename){
 	map<pair<string, string>, pair<int, int>> res;
 	// res.insert({make_pair("0","0"), make_pair(0,0)});
-
+	string id = filename.substr(0,filename.length()-4);
 	ifstream myfile(filename);
+	ofstream cdfFile;
+
 	if(myfile.is_open() && filename.find("_letsee_all") != std::string::npos){
 		// cout<<"OPENED " + filename<<endl;
+		cdfFile.open(id + "_cdf.csv");
 		string l;
 		while(getline(myfile,l)){
 			vector<string> line = giveTokens(l);
@@ -107,7 +134,32 @@ void connectionDuration(string filename){
 				it->second.second = its_time;// = make_pair(it->second.first, its_time);
 			}
 		}
-		printSpecialMaps(res);
+		// printSpecialMaps(res);
+		// miniController(id, res); ---------------------------------
+		int max_duration = maxTimeDuration(res);
+		double tempp = 0;
+
+		vector<double> answertocdf(max_duration,0);
+		
+		map<pair<string, string>, pair<int, int>>::iterator itr;
+		
+		for(int i=0;i<=max_duration;i++){
+			for(itr = res.begin();itr!=res.end();itr++){
+				int time = (itr->second).second - (itr->second).first;
+				if(time < i){
+					answertocdf[i] += 1;
+				}
+			}
+		}
+		tempp = answertocdf[answertocdf.size()-1];
+		cdfFile << "\"Connection Duration\"" << "\"Probability\""<<endl;
+		for(int i=0;i<answertocdf.size();i++){
+			// answertocdf[i] /= tempp;
+			cout<<i<<" -> "<<(answertocdf[i])/tempp<<endl; 
+			cdfFile << "\""<<i<<"\""<<",\""<<(answertocdf[i])/tempp<<"\""<<endl;
+		}
+		//-----------------------------------------------------------
+
 	} else {
 		cout<<"File " + filename + " not opened correctly."<<endl;
 	}
@@ -118,7 +170,6 @@ int main(int argc, char const *argv[])
 {
 	string path_header = "./outputs/q4/";
 	vector<string> s = {{"lbnl.anon-ftp.03-01-11"},{"lbnl.anon-ftp.03-01-14"},{"lbnl.anon-ftp.03-01-18"}}; 
-	for(int i=0;i<1;i++){connectionDuration(path_header + s[i] + "_letsee_all.csv");}
-
+	for(int i=0;i<s.size();i++){connectionDuration(path_header + s[i] + "_letsee_all.csv");}
 	return 0;
 }
