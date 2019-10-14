@@ -6,9 +6,9 @@ p8_incoming_1 <- ecdf(q8_incoming_1[[1]])
 p8_incoming_4 <- ecdf(q8_incoming_4[[1]])
 p8_incoming_8 <- ecdf(q8_incoming_8[[1]])
 
-plot(p9_incoming_1, xlab = 'Incoming Packet Length', ylab = 'Frequency', main = 'Length of incoming packets sent to Servers')
-plot(p9_incoming_1, xlab = 'Incoming Packet Length', ylab = 'Frequency', main = 'Length of incoming packets sent to Servers')
-plot(p9_incoming_1, xlab = 'Incoming Packet Length', ylab = 'Frequency', main = 'Length of incoming packets sent to Servers')
+plot(p8_incoming_1, xlab = 'Incoming Packet Length', ylab = 'Frequency', main = 'Length of incoming packets sent to Servers')
+plot(p8_incoming_4, xlab = 'Incoming Packet Length', ylab = 'Frequency', main = 'Length of incoming packets sent to Servers')
+plot(p8_incoming_8, xlab = 'Incoming Packet Length', ylab = 'Frequency', main = 'Length of incoming packets sent to Servers')
 
 # -----------------------------------------------------
 
@@ -72,4 +72,4 @@ denscomp(list(fe_8), legendtext=c("exp"))
 cdfcomp(list(fe_8), legendtext=c("exp"))
 qqcomp(list(fe_8), legendtext=c("exp"))
 
-while (!is.null(dev.list())) Sys.sleep(1)
+# while (!is.null(dev.list())) Sys.sleep(1)
