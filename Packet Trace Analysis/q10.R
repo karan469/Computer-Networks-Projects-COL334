@@ -53,23 +53,26 @@ library("fitdistrplus")
 
 plotdist(df_1$"Incoming_Packet_Time_Interval", histo=TRUE, demp=TRUE)
 descdist(df_1$"Incoming_Packet_Time_Interval")
-# fe_1 <- fitdist(df_1$"Incoming_Packet_Time_Interval", "exp")
-# denscomp(list(fe_1), legendtext=c("exp"))
-# cdfcomp(list(fe_1), legendtext=c("exp"))
+fe_1 <- fitdist(df_1$"Incoming_Packet_Time_Interval", "exp")
+plot(fe_1)
+denscomp(list(fe_1), legendtext=c("exp"))
+cdfcomp(list(fe_1), legendtext=c("exp"))
 # qqcomp(list(fe_1), legendtext=c("exp"))
 
 plotdist(df_4$"Incoming_Packet_Time_Interval", histo=TRUE, demp=TRUE)
 descdist(df_4$"Incoming_Packet_Time_Interval")
-# fe_4 <- fitdist(df_4f$"Incoming_Packet_Time_Interval", "exp")
-# denscomp(list(fe_4), legendtext=c("exp"))
-# cdfcomp(list(fe_4), legendtext=c("exp"))
+fe_4 <- fitdist(df_4$"Incoming_Packet_Time_Interval", "exp")
+plot(fe_4)
+denscomp(list(fe_4), legendtext=c("exp"))
+cdfcomp(list(fe_4), legendtext=c("exp"))
 # qqcomp(list(fe_4), legendtext=c("exp"))
 
 plotdist(df_8$"Incoming_Packet_Time_Interval", histo=TRUE, demp=TRUE);
 descdist(df_8$"Incoming_Packet_Time_Interval")
-# fe_8 <- fitdist(df_8$"Incoming_Packet_Time_Interval", "exp");
-# denscomp(list(fe_8), legendtext=c("exp"))
-# cdfcomp(list(fe_8), legendtext=c("exp"))
+fe_8 <- fitdist(df_8$"Incoming_Packet_Time_Interval", "exp");
+plot(fe_4)
+denscomp(list(fe_8), legendtext=c("exp"))
+cdfcomp(list(fe_8), legendtext=c("exp"))
 # qqcomp(list(fe_8), legendtext=c("exp"))
 
 # while (!is.null(dev.list())) Sys.sleep(1)
