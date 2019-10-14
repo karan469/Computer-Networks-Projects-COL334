@@ -120,7 +120,7 @@ void connectionDurationBetweenConnections(string id, map<pair<string, string>, p
 {
 	map<pair<string, string>, pair<double, double>>::iterator itr;
 	vector<double> store;
-	cout << "yo man!!!" <<endl;
+	// cout << "yo man!!!" <<endl;
 	for(itr = res.begin();itr!=res.end();itr++){
 		// cout << (itr->second).first << endl;
 		store.push_back((itr)->second.first);
@@ -135,9 +135,10 @@ void connectionDurationBetweenConnections(string id, map<pair<string, string>, p
 	
 	ofstream cdfFile;
 	string path_header = "./outputs/q6/";
-	cout << path_header + id + "_connectionDurationBetweenConnections.csv" << endl;
-	cdfFile.open(path_header + id + "_connectionDurationBetweenConnections.csv");
-	cdfFile << "\"Probability\""<<endl;
+	// cout << path_header + id + "_interarrival_betweenConnections.csv" << endl;
+	id = id.substr(0,id.length()-11);
+	cdfFile.open(path_header + id + "_interarrival_in_Connections.csv");
+	cdfFile << "\"Inter_arrival_time\""<<endl;
 	for(int i=0;i<diff.size();i++){
 		// answertocdf[i] /= tempp;
 		cdfFile <<"\""<<(diff[i])<<"\""<<endl;
@@ -148,7 +149,6 @@ void connectionDurationBetweenConnections(string id, map<pair<string, string>, p
 map<pair<string, string>, pair<double, double>> connectionDuration(string filename){
 	map<pair<string, string>, pair<int, int>> res;
 	map<pair<string, string>, pair<double, double>> resd;
-	// res.insert({make_pair("0","0"), make_pair(0,0)});
 	string id = filename.substr(0,filename.length()-4);
 	ifstream myfile(filename);
 	ofstream cdfFile;
@@ -184,8 +184,7 @@ map<pair<string, string>, pair<double, double>> connectionDuration(string filena
 			}
 		}
 		connectionDurationBetweenConnections(id.substr(13, id.length()), resd);
-		// printSpecialMaps(res);
-		// miniController(id, res); ---------------------------------
+
 		int max_duration = maxTimeDuration(res);
 		double tempp = 0;
 
@@ -204,8 +203,6 @@ map<pair<string, string>, pair<double, double>> connectionDuration(string filena
 		tempp = answertocdf[answertocdf.size()-1];
 		cdfFile << "\"Connection Duration\"," << "\"Probability\""<<endl;
 		for(int i=0;i<answertocdf.size();i++){
-			// answertocdf[i] /= tempp;
-			// cout<<i<<" -> "<<(answertocdf[i])/tempp<<endl; 
 			cdfFile << "\""<<i<<"\""<<",\""<<(answertocdf[i])/tempp<<"\""<<endl;
 		}
 		cout<<"Mean Time Duration for " + id<<": "<<meanTimeDuration(res)<<endl;
@@ -265,7 +262,6 @@ void sentAndRecData(string filename, string filenameForduration){
 		for(itr = res.begin();itr!=res.end();itr++){
 			pair<string, string> pr1 = (itr->first);
 			map<pair<string, string>, pair<double, double>>::iterator it1 = resfortime.find(pr1);
-			// outputq5<< "\"" <<(itr->first).first << "\",\"" << (itr->first).second << "\",\"" << (itr->second).first << "\",\"" << (itr->second).second<< "\",\"" << (it1->second).second - (it1->second).first <<"\""<<endl;
 			if(it1!=resfortime.end())
 			{
 				if((it1->second).second>0 && (it1->second).first >0)
@@ -274,15 +270,16 @@ void sentAndRecData(string filename, string filenameForduration){
 				}
 				else
 				{
-					cout << (itr->first).first << " " << (itr->first).second << " " <<(it1->second).first << " " << (it1->second).second << endl;
+					// DEBUGGING
+					// cout << (itr->first).first << " " << (itr->first).second << " " <<(it1->second).first << " " << (it1->second).second << endl;
 				}
 			}
 			else
 			{
-				cout << "Not found " << (itr->first).first << " " << (itr->first).second << endl;
+				// DEBUGGING
+				// cout << "Not found " << (itr->first).first << " " << (itr->first).second << endl;
 			}
 		}
-		// printSpecialMaps(res);
 		outputq5.close();
 	} else {
 		cout<<"Cannot open "<<filename<<endl;
