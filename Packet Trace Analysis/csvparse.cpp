@@ -132,9 +132,9 @@ void solveCSV(string sg){
 		uniqueTCPAllFile.close();
 		
 		// Now create actual unique server/client IP csv and remove this *_syn.csv files
-		// system(("awk -F, '!seen[$4]++' " + id + "_syn.csv" + " > " +  id + "_unique_server.csv").c_str());
-		// system(("awk -F, '!seen[$3]++' " + id + "_syn.csv" + " > " +  id + "_unique_client.csv").c_str());
-		system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_flow_ackonly.csv" + " > " +  id + "_unique_flow_ackonly.csv").c_str());
+		system(("awk -F, '!seen[$4]++' " + id + "_syn.csv" + " > " + "./outputs/q1/" + id + "_unique_server.csv").c_str());
+		system(("awk -F, '!seen[$3]++' " + id + "_syn.csv" + " > " + "./outputs/q1/" + id + "_unique_client.csv").c_str());
+		system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_flow_ackonly.csv" + " > " + "./outputs/q2/" +  id + "_unique_flow_ackonly.csv").c_str());
 
 		system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ id + "_tcp_all.csv" + " > " +  id + "_tcp_all1.csv").c_str());
 		system(("awk -F, -v s=\"Seq\" '!seen[$3, $4, (substr($7, 0, index($7,s)-1))]++' " + id + "_tcp_all1.csv" + " > " +  "./outputs/q4/" + id + "_letsee_all1.csv").c_str()); //this assumes a directory ./outputs/q4/
