@@ -24,12 +24,12 @@ vector<string> giveTokens(string s){
 
 void trafficCount(string filename){
 	ifstream myfile(filename);
-	string id = filename.substr(0,filename.length()-24);
+	string id = filename.substr(13,filename.length()-37);
 	ofstream TCP_traffic_histogram;
 
 	vector<int> count(23,0);
 	if(myfile.is_open() && filename.find("_unique_flow_ackonly") != std::string::npos){
-		TCP_traffic_histogram.open(id + "_tcp_histogram.csv");
+		TCP_traffic_histogram.open("./outputs/q3/" + id + "_tcp_histogram.csv");
 		string l;
 		while(getline(myfile,l)){
 			vector<string> line = giveTokens(l);
@@ -56,6 +56,6 @@ void trafficCount(string filename){
 int main(int argc, char const *argv[])
 {
 	vector<string> s = {{"lbnl.anon-ftp.03-01-11"},{"lbnl.anon-ftp.03-01-14"},{"lbnl.anon-ftp.03-01-18"}}; 
-	for(int i=0;i<s.size();i++){trafficCount(s[i] + "_unique_flow_ackonly.csv");}
+	for(int i=0;i<s.size();i++){trafficCount("./outputs/q2/" + s[i] + "_unique_flow_ackonly.csv");}
 	return 0;
 }
