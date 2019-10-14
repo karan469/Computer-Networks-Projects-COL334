@@ -112,8 +112,36 @@ int isDestinationPort21(string s){
 	return -1;
 }
 
+void connectionDurationBetweenConnections(string id, map<pair<string, string>, pair<double, double>> res)
+{
+	map<pair<string, string>, pair<double, double>>::iterator itr;
+	vector<double> store;
+	cout << "yo man!!!" <<endl;
+	for(itr = res.begin();itr!=res.end();itr++){
+		cout << (itr->second).first << endl;
+		store.push_back((itr)->second.first);
+	}
+	sort(store.begin(), store.end());
+	vector<double> diff;
+	for (int i = 1; i < store.size(); i++)
+	{
+		cout<< store[i] << " "<<store[i-1] << " " << store[i]-store[i-1] << endl;
+		diff.push_back(store[i]-store[i-1]);
+	}
+	
+	ofstream cdfFile;
+	cdfFile.open(id + "_connectionDurationBetweenConnections.csv");
+	cdfFile << "\"Probability\""<<endl;
+	for(int i=0;i<diff.size();i++){
+		// answertocdf[i] /= tempp;
+		cdfFile <<"\""<<(diff[i])<<"\""<<endl;
+	}
+}
+
+
 void connectionDuration(string filename){
 	map<pair<string, string>, pair<int, int>> res;
+	map<pair<string, string>, pair<double, double>> resd;
 	// res.insert({make_pair("0","0"), make_pair(0,0)});
 	string id = filename.substr(0,filename.length()-4);
 	ifstream myfile(filename);
@@ -128,20 +156,28 @@ void connectionDuration(string filename){
 			string sourceIP = sourceip(l);
 			string destIP = destip(l);
 			int its_time = stoi(line[1].substr(1,line[1].length()-2));
+			double its_timed = stod(line[1].substr(1,line[1].length()-2));
 			// cout<<sourceIP<< " ? " <<destIP<<endl;
 			pair<string, string> pr1 = make_pair(sourceIP, destIP);
 			pair<string, string> pr2 = make_pair(destIP, sourceIP);
 			map<pair<string, string>, pair<int, int>>::iterator it = res.find(pr1);
 			map<pair<string, string>, pair<int, int>>::iterator it2 = res.find(pr2);
 			
+			map<pair<string, string>, pair<double, double>>::iterator itd = resd.find(pr1);
+			map<pair<string, string>, pair<double, double>>::iterator itd2 = resd.find(pr2);
+			
 			if(it==res.end() && synOrFinAckOrRst(line[6])==-1){
 				res.insert({pr1, make_pair(its_time,0)});
+				resd.insert({pr1, make_pair(its_timed,0)});
 			} else if((it2!=res.end()) && synOrFinAckOrRst(line[6])>=0){
 				it2->second.second = its_time;// = make_pair(it->second.first, its_time);
+				itd2->second.second = its_time;// = make_pair(it->second.first, its_time);
 			} else if((it!=res.end()) && synOrFinAckOrRst(line[6])>=0){
 				it->second.second = its_time;// = make_pair(it->second.first, its_time);
+				itd->second.second = its_time;// = make_pair(it->second.first, its_time);
 			}
 		}
+		connectionDurationBetweenConnections(id, resd);
 		// printSpecialMaps(res);
 		// miniController(id, res); ---------------------------------
 		int max_duration = maxTimeDuration(res);
