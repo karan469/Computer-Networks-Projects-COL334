@@ -1,3 +1,4 @@
+// This file will take only the original apache logs as inputs. Thus this program doesn't require intermediate .csv
 #include <iostream>
 #include <bits/stdc++.h>
 #include <fstream>
