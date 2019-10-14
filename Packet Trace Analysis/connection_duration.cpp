@@ -46,15 +46,19 @@ int synOrAck(string s){ //RETURN: -1: SYN | 0: SYN,ACK | 1: ACK
 
 int synOrFinAckOrRst(string s){
 	string s1 = s;
+	string s22 = "[SYN, ECN, CWR]";
 	string s2 = "[SYN]";
 	string s3 = "[FIN, ACK]";
 	string s4 = "[RST]";
-	if (s1.find(s2) != std::string::npos){
+	string s5 = "[RST, ACK]";
+	if (s1.find(s2) != std::string::npos || s1.find(s22) != std::string::npos){
 		return -1;
 	} else if (s1.find(s3) != std::string::npos){
 		return 0;
 	} else if(s1.find(s4) != std::string::npos){
 		return 1;
+	} else if(s1.find(s5) != std::string::npos){
+		return 2;
 	}
 	return INT_MAX;
 }
@@ -118,19 +122,21 @@ void connectionDurationBetweenConnections(string id, map<pair<string, string>, p
 	vector<double> store;
 	cout << "yo man!!!" <<endl;
 	for(itr = res.begin();itr!=res.end();itr++){
-		cout << (itr->second).first << endl;
+		// cout << (itr->second).first << endl;
 		store.push_back((itr)->second.first);
 	}
 	sort(store.begin(), store.end());
 	vector<double> diff;
 	for (int i = 1; i < store.size(); i++)
 	{
-		cout<< store[i] << " "<<store[i-1] << " " << store[i]-store[i-1] << endl;
+		// cout<< store[i] << " "<<store[i-1] << " " << store[i]-store[i-1] << endl;
 		diff.push_back(store[i]-store[i-1]);
 	}
 	
 	ofstream cdfFile;
-	cdfFile.open(id + "_connectionDurationBetweenConnections.csv");
+	string path_header = "./outputs/q6/";
+	cout << path_header + id + "_connectionDurationBetweenConnections.csv" << endl;
+	cdfFile.open(path_header + id + "_connectionDurationBetweenConnections.csv");
 	cdfFile << "\"Probability\""<<endl;
 	for(int i=0;i<diff.size();i++){
 		// answertocdf[i] /= tempp;
@@ -139,7 +145,7 @@ void connectionDurationBetweenConnections(string id, map<pair<string, string>, p
 }
 
 
-void connectionDuration(string filename){
+map<pair<string, string>, pair<double, double>> connectionDuration(string filename){
 	map<pair<string, string>, pair<int, int>> res;
 	map<pair<string, string>, pair<double, double>> resd;
 	// res.insert({make_pair("0","0"), make_pair(0,0)});
@@ -171,13 +177,13 @@ void connectionDuration(string filename){
 				resd.insert({pr1, make_pair(its_timed,0)});
 			} else if((it2!=res.end()) && synOrFinAckOrRst(line[6])>=0){
 				it2->second.second = its_time;// = make_pair(it->second.first, its_time);
-				itd2->second.second = its_time;// = make_pair(it->second.first, its_time);
+				itd2->second.second = its_timed;// = make_pair(it->second.first, its_time);
 			} else if((it!=res.end()) && synOrFinAckOrRst(line[6])>=0){
 				it->second.second = its_time;// = make_pair(it->second.first, its_time);
-				itd->second.second = its_time;// = make_pair(it->second.first, its_time);
+				itd->second.second = its_timed;// = make_pair(it->second.first, its_time);
 			}
 		}
-		connectionDurationBetweenConnections(id, resd);
+		connectionDurationBetweenConnections(id.substr(13, id.length()), resd);
 		// printSpecialMaps(res);
 		// miniController(id, res); ---------------------------------
 		int max_duration = maxTimeDuration(res);
@@ -208,11 +214,12 @@ void connectionDuration(string filename){
 	} else {
 		cout<<"File " + filename + " not opened correctly."<<endl;
 	}
-
+	return resd;
 }
 
-void sentAndRecData(string filename){
+void sentAndRecData(string filename, string filenameForduration){
 	map<pair<string, string>, pair<int, int>> res;
+	map<pair<string, string>, pair<double, double>> resfortime = connectionDuration(filenameForduration);
 	// res.insert({make_pair("0","0"), make_pair(0,0)});
 	string id = filename.substr(0,filename.length()-4);
 	ifstream myfile(filename);
@@ -253,10 +260,27 @@ void sentAndRecData(string filename){
 				} 
 			}
 		}
-		outputq5<<"\""<<"Client IP"<< "\"," <<"Server IP"<< "\"," <<"Data Sent"<< "\"," <<"\"Data Recieved\""<<endl;
+		outputq5<<"\""<<"Client_IP"<< "\",\"" <<"Server_IP"<< "\",\"" <<"Data_Sent"<< "\"," <<"\"Data_Received"<< "\",\"" <<"Duration\""<<endl;
 		map<pair<string, string>, pair<int, int>>::iterator itr;
 		for(itr = res.begin();itr!=res.end();itr++){
-			outputq5<<(itr->first).first << "," << (itr->first).second << ",\"" << (itr->second).first << "\",\"" << (itr->second).second<<"\""<<endl;
+			pair<string, string> pr1 = (itr->first);
+			map<pair<string, string>, pair<double, double>>::iterator it1 = resfortime.find(pr1);
+			// outputq5<< "\"" <<(itr->first).first << "\",\"" << (itr->first).second << "\",\"" << (itr->second).first << "\",\"" << (itr->second).second<< "\",\"" << (it1->second).second - (it1->second).first <<"\""<<endl;
+			if(it1!=resfortime.end())
+			{
+				if((it1->second).second>0 && (it1->second).first >0)
+				{
+					outputq5<< "\"" <<(itr->first).first << "\",\"" << (itr->first).second << "\",\"" << (itr->second).first << "\",\"" << (itr->second).second<< "\",\"" << (it1->second).second - (it1->second).first <<"\""<<endl;
+				}
+				else
+				{
+					cout << (itr->first).first << " " << (itr->first).second << " " <<(it1->second).first << " " << (it1->second).second << endl;
+				}
+			}
+			else
+			{
+				cout << "Not found " << (itr->first).first << " " << (itr->first).second << endl;
+			}
 		}
 		// printSpecialMaps(res);
 		outputq5.close();
@@ -270,7 +294,7 @@ int main(int argc, char const *argv[])
 	string path_header = "./outputs/q4/";
 	string path_header_q5 = "./outputs/q5/";
 	vector<string> s = {{"lbnl.anon-ftp.03-01-11"},{"lbnl.anon-ftp.03-01-14"},{"lbnl.anon-ftp.03-01-18"}}; 
-	for(int i=0;i<s.size();i++){connectionDuration(path_header + s[i] + "_letsee_all.csv");}
-	for(int i=0;i<s.size();i++){sentAndRecData(path_header_q5 + s[i] + "_unique_tcp_allpackets.csv");}
+	// for(int i=0;i<s.size();i++){connectionDuration(path_header + s[i] + "_letsee_all.csv");}
+	for(int i=0;i<s.size();i++){sentAndRecData(path_header_q5 + s[i] + "_unique_tcp_allpackets.csv", path_header + s[i] + "_letsee_all.csv");}
 	return 0;
 }

@@ -48,15 +48,19 @@ int synOrAck(string s){ //RETURN: -1: SYN | 0: SYN,ACK | 1: ACK
 
 int synOrFinAckOrRst(string s){
 	string s1 = s;
+	string s22 = "[SYN, ECN, CWR]";
 	string s2 = "[SYN]";
 	string s3 = "[FIN, ACK]";
 	string s4 = "[RST]";
-	if (s1.find(s2) != std::string::npos){
+	string s5 = "[RST, ACK]";
+	if (s1.find(s2) != std::string::npos || s1.find(s22) != std::string::npos){
 		return -1;
 	} else if (s1.find(s3) != std::string::npos){
 		return 0;
 	} else if(s1.find(s4) != std::string::npos){
 		return 1;
+	}else if(s1.find(s5) != std::string::npos){
+		return 2;
 	}
 	return INT_MAX;
 }
@@ -117,7 +121,7 @@ void solveCSV(string sg){
 				if(synOrAck(line[6])==1 && isDestinationPort21(line[6])==1){
 					uniqueTCPFlowFile<<l<<endl;
 				}
-				if((synOrFinAckOrRst(line[6])==-1 && isDestinationPort21(line[6])==1) || synOrFinAckOrRst(line[6])==0 || (synOrFinAckOrRst(line[6])==1)){
+				if((synOrFinAckOrRst(line[6])==-1 && isDestinationPort21(line[6])==1) || synOrFinAckOrRst(line[6])==0 || (synOrFinAckOrRst(line[6])==1) || (synOrFinAckOrRst(line[6])==2)){
 					uniqueTCPAllFile<<l<<endl;
 				}
 			}
@@ -130,14 +134,17 @@ void solveCSV(string sg){
 		// Now create actual unique server/client IP csv and remove this *_syn.csv files
 		// system(("awk -F, '!seen[$4]++' " + id + "_syn.csv" + " > " +  id + "_unique_server.csv").c_str());
 		// system(("awk -F, '!seen[$3]++' " + id + "_syn.csv" + " > " +  id + "_unique_client.csv").c_str());
-		// system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_flow_ackonly.csv" + " > " +  id + "_unique_flow_ackonly.csv").c_str());
-		// system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ id + "_tcp_all.csv" + " > " +  id + "_tcp_all1.csv").c_str());
-		// system(("awk -F, -v s=\"Seq\" '!seen[$3, $4, (substr($7, 0, index($7,s)-1))]++' " + id + "_tcp_all1.csv" + " > " +  "./outputs/q4/" + id + "_letsee_all1.csv").c_str()); //this assumes a directory ./outputs/q4/
+		system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_flow_ackonly.csv" + " > " +  id + "_unique_flow_ackonly.csv").c_str());
+
+		system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ id + "_tcp_all.csv" + " > " +  id + "_tcp_all1.csv").c_str());
+		system(("awk -F, -v s=\"Seq\" '!seen[$3, $4, (substr($7, 0, index($7,s)-1))]++' " + id + "_tcp_all1.csv" + " > " +  "./outputs/q4/" + id + "_letsee_all1.csv").c_str()); //this assumes a directory ./outputs/q4/
 		string filepath = "./outputs/q4/";
-		// system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ filepath  + id + "_letsee_all1.csv" + " > " +  "./outputs/q4/" +  id + "_letsee_all.csv").c_str());
+		system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ filepath  + id + "_letsee_all1.csv" + " > " +  "./outputs/q4/" +  id + "_letsee_all.csv").c_str());
 
-		system(("awk -F, '!seen[$3, $4, $7]++' " + sg + " > " +  "outputs/q5/" + id + "_unique_tcp_allpackets.csv").c_str());
-
+		system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ sg + " > " +  sg + "1.csv").c_str());
+		system(("awk -F, '!seen[$3, $4, $7]++' " + sg + "1.csv" + " > " +  "outputs/q5/" + id + "_unique_tcp_allpackets1.csv").c_str());
+		string filepath1 = "./outputs/q5/";
+		system(("awk '{a[i++]=$0}END{for(j=i-1;j>=0;j--)print a[j];}' "+ filepath1  + id + "_unique_tcp_allpackets1.csv" + " > " +  "./outputs/q5/" +  id + "_unique_tcp_allpackets.csv").c_str());
 		// system(("awk -F, '!seen[$3, $4, (substr($7, 0, 11))]++' " + id + "_tcp_all.csv" + " > " +  "./outputs/q4/" + id + "_letsee_all.csv").c_str()); //this assumes a directory ./outputs/q4/
 		
 		// if you want to store _letsee_all.csv in home directory too.
@@ -150,7 +157,10 @@ void solveCSV(string sg){
 		system(("rm " +  id + "_syn.csv").c_str());
 		system(("rm " +  id + "_tcp_flow_ackonly.csv").c_str());
 		system(("rm " +  id + "_tcp_all1.csv").c_str());
+		system(("rm " + sg + "1.csv").c_str());
 		system(("rm " + filepath +  id + "_letsee_all1.csv").c_str());
+		system(("rm " + filepath1 + id + "_unique_tcp_allpackets1.csv").c_str());
+
 		// cout<<"No. of SYN packets: "<<uniqueServerIPs<<endl;
 		cout<<"File opened successfully: " + sg<<endl<<endl;
 	} else {
