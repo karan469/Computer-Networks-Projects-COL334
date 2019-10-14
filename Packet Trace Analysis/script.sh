@@ -17,3 +17,6 @@ if [ $count != 0 ]; then rm *.csv;echo Removed residual csv files; fi;
 cp ./apache_logs/*.csv  ./;
 g++ -o first csvparse.cpp; g++ -o second hisogram_generator.cpp;
 ./first; ./second
+g++ -o third connection_duration.cpp; ./third;
+g++ -o fourth incomingNoutgoing.cpp; ./fourth;
+Rscript q10.R
