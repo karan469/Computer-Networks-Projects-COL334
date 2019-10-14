@@ -110,9 +110,9 @@ bool isResponseToClient(string s){
 
 void incoming(string filename){
 	ifstream myfile(filename);
-	string path_header_q6 = "./outputs/q6/";
+	string path_header_q7 = "./outputs/q7/";
 	string id = filename.substr(0,filename.length()-4);
-	ofstream outfile(path_header_q6 + id + "_all_incoming.csv");
+	ofstream outfile(path_header_q7 + id + "_all_incoming.csv");
 	vector<double> time_list;
 	vector<double> timeinterval;
 	timeinterval.push_back((double)0);
@@ -130,7 +130,7 @@ void incoming(string filename){
 		for(int i=1;i<time_list.size();i++){
 			timeinterval.push_back(time_list[i]-time_list[i-1]);
 		}
-		outfile<<"\"Incoming Packet Time Interval\""<<endl;
+		outfile<<"\"Incoming_Packet_Time_Interval\""<<endl;
 		for(int i=1;i<timeinterval.size();i++){
 			// cout<<"\"" << timeinterval[i] << "\"" << endl;
 			outfile<<"\"" << timeinterval[i] << "\"" << endl;
@@ -145,9 +145,9 @@ void incoming(string filename){
 
 void packetLengthIncoming(string filename){
 	ifstream myfile(filename);
-	string path_header_q7 = "./outputs/q7/";
+	string path_header_q8 = "./outputs/q8/";
 	string id = filename.substr(0,filename.length()-4);
-	ofstream outfile(path_header_q7 + id + "_incoming_packet_length.csv");
+	ofstream outfile(path_header_q8 + id + "_incoming_packet_length.csv");
 	vector<int> packetLength_list;
 
 	if(myfile.is_open()){
@@ -160,7 +160,7 @@ void packetLengthIncoming(string filename){
 				packetLength_list.push_back(length);
 			}
 		}
-		outfile<<"\"Incoming Packet Length\""<<endl;
+		outfile<<"\"Incoming_Packet_Length\""<<endl;
 		for(int i=1;i<packetLength_list.size();i++){
 			outfile<<"\"" << packetLength_list[i] << "\"" << endl;
 		}
@@ -174,9 +174,9 @@ void packetLengthIncoming(string filename){
 
 void packetLengthOutgoing(string filename){
 	ifstream myfile(filename);
-	string path_header_q7 = "./outputs/q7/";
+	string path_header_q8 = "./outputs/q8/";
 	string id = filename.substr(0,filename.length()-4);
-	ofstream outfile(path_header_q7 + id + "_outgoing_packet_length.csv");
+	ofstream outfile(path_header_q8 + id + "_outgoing_packet_length.csv");
 	vector<int> packetLength_list;
 
 	if(myfile.is_open()){
@@ -192,7 +192,7 @@ void packetLengthOutgoing(string filename){
 				packetLength_list.push_back(length);
 			}
 		}
-		outfile<<"\"Outgoing Packet Length\""<<endl;
+		outfile<<"\"Outgoing_Packet_Length\""<<endl;
 		for(int i=1;i<packetLength_list.size();i++){
 			outfile<<"\"" << packetLength_list[i] << "\"" << endl;
 		}
