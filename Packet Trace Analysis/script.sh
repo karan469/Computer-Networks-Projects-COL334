@@ -24,4 +24,8 @@ g++ -o third connection_duration.cpp; ./third;
 g++ -o fourth incomingNoutgoing.cpp; ./fourth;
 rm ./outputs/q4/*_letsee_all.csv
 rm *.csv
+rm first
+rm second
+rm third
+rm fourth
 Rscript q10.R
