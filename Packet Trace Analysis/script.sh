@@ -1,5 +1,8 @@
 #!/bin/bash
 
+countt=`ls -1 *.csv 2>/dev/null | wc -l`
+if [ $countt != 0 ]; then mkdir apache_logs; cp *csv ./apache_logs; fi;
+
 if test ! -d ./outputs; then mkdir ./outputs; fi
 if test ! -d ./outputs/q1; then mkdir ./outputs/q1; fi
 if test ! -d ./outputs/q2; then mkdir ./outputs/q2; fi
@@ -19,4 +22,6 @@ g++ -o first csvparse.cpp; g++ -o second hisogram_generator.cpp;
 ./first; ./second
 g++ -o third connection_duration.cpp; ./third;
 g++ -o fourth incomingNoutgoing.cpp; ./fourth;
+rm ./outputs/q4/*_letsee_all.csv
+rm *.csv
 Rscript q10.R
