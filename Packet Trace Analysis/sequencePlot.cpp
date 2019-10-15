@@ -206,7 +206,7 @@ int main(int argc, char const *argv[])
 	filename="./apache_logs/lbnl.anon-ftp.03-01-11.csv";
 
 	sequence_plot(filename, client_ip, server_ip, source_port, destination_port);
-
+	retransmitted(filename);
 
 	return 0;
 }
