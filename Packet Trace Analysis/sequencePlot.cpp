@@ -107,6 +107,88 @@ void sequence_plot(string filename, string client_ip, string server_ip, string s
 		}
 	}
 }
+
+int isSourcePort21(string s){
+	string s1 = s;
+	string s2 = "21  < ";
+	if (s1.find(s2) != std::string::npos){
+		return 1;
+	}
+	return -1;
+}
+
+string sourceip(string s){
+	return giveTokens(s)[2];
+}
+
+string destip(string s){
+	return giveTokens(s)[3];
+}
+
+string dest_port(string s){
+	int startpos = s.find("21  >  ");
+	int endpos = s.find("[ACK]");
+	string num = s.substr(startpos+7, endpos-startpos-8);
+	// cout<<"# "<<num<<endl;
+	// if(s.find("[ACK]")!=string::npos){return stoi(num);}
+	return num;
+}
+
+void retransmitted(string filename){
+	ifstream myfile(filename);
+	string id = filename.substr(0,filename.length()-4);
+	map<tuple<string, string, string, string>, string> transmitted;
+	string path_header_q9 = "./outputs/q9/";
+	ofstream outfile(path_header_q9 + id + "_retransmitted_tuple.csv");
+
+	if(myfile.is_open()){
+		cout<<"File: "<<filename<<" opened successfully."<<endl;
+		string l;
+		outfile<<"\"Server_IP\",\"Client_IP\",\"Server_port\",\"Client_port\""<<endl;
+		while(getline(myfile, l)){
+			vector<string> line = giveTokens(l);
+			string source = sourceip(l);
+			string dest = destip(l);
+			string port1 = dest_port(line[6]);
+			string port2 = "21";
+			tuple<string, string, string, string> tup = make_tuple(source, dest, port1, port2);
+
+			map<tuple<string, string, string, string>, string>::iterator itr = transmitted.find(tup);
+			
+			if(isSourcePort21(line[6]) && synOrAck(line[6])==1 && itr == transmitted.end()){
+				int startpos = line[6].find("Ack");
+				int endpos = line[6].find("Win");
+				string acknum = line[6].substr(startpos+4, endpos-startpos-6);
+				acknum = acknum.substr(1,acknum.length()-2);
+				transmitted.insert({tup, acknum});
+				// outfile<<"\"" << source << ",\"" << dest << "\",\"" << port1 << "\",\"" << port2 << "\"" <<endl;
+			}
+		}
+	} else {
+		cout<<"Cannot open file: "<<filename<<endl;
+	}
+	myfile.close();
+	ifstream myfile1(filename);
+	if(myfile1.is_open()){
+		cout<<"OPENED AGAIN"<<endl;
+		string l;
+		getline(myfile1,l);
+		while(getline(myfile1,l)){
+			vector<string> line = giveTokens(l);
+			string source = sourceip(l);
+			string dest = destip(l);
+			string port1 = dest_port(line[6]);
+			string port2 = "21";
+			tuple<string, string, string, string> tup = make_tuple(source, dest, port1, port2);
+
+			map<tuple<string, string, string, string>, string>::iterator itr;
+			if(itr!=transmitted.end() && isSourcePort21(line[6]) && synOrAck(line[6])==1 && port1.find(">")==string::npos){
+				outfile << source << "," << dest << ",\"" << port1 << "\",\"" << port2 << "\"" <<endl;
+			}
+		}
+	}
+}
+
 int main(int argc, char const *argv[])
 {
 	/* code */
